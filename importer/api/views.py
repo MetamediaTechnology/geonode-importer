@@ -48,6 +48,12 @@ from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from geonode.views import (
+    get_uid,
+    check_limit_size
+)
+import zipfile
+
 logger = logging.getLogger(__name__)
 
 
@@ -116,6 +122,25 @@ class ImporterViewSet(DynamicModelViewSet):
         if _file and handler:
 
             try:
+                user = request.user
+                if not user.is_staff:
+                    username = user.get_username()
+                    uid = get_uid(username=username)
+                    file_name = request.FILES.get('base_file')
+                    file_size = 0
+                    if zipfile.is_zipfile(file_name):
+                        zp = zipfile.ZipFile(file_name)
+                        size = sum([zinfo.file_size for zinfo in zp.filelist])
+                        file_size = float(size)/1024
+                    else:
+                        for filename, file in request.FILES.items():
+                            if filename != 'shp_file':
+                                file_size += request.FILES[filename].size/1024.0
+                    # check limit size
+                    is_able_upload = check_limit_size(uid,file_size,'dataset')
+                    if not is_able_upload:
+                        return Response(data={'error':'Storage usage exceed limit.'}, status=400)
+
                 # cloning data into a local folder
                 extracted_params, _data = handler.extract_params_from_data(_data)
                 if storage_manager is None:
