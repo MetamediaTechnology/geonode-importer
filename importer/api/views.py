@@ -131,11 +131,11 @@ class ImporterViewSet(DynamicModelViewSet):
                     if zipfile.is_zipfile(file_name):
                         zp = zipfile.ZipFile(file_name)
                         size = sum([zinfo.file_size for zinfo in zp.filelist])
-                        file_size = float(size)/1024
+                        file_size = float(size)/1048576
                     else:
                         for filename, file in request.FILES.items():
                             if filename != 'shp_file':
-                                file_size += request.FILES[filename].size/1024.0
+                                file_size += request.FILES[filename].size/1048576.0
                     # check limit size
                     is_able_upload = check_limit_size(uid,file_size,'dataset')
                     if not is_able_upload:
