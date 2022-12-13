@@ -134,7 +134,7 @@ class ImporterViewSet(DynamicModelViewSet):
                         file_size = float(size)/1048576
                     else:
                         for filename, file in request.FILES.items():
-                            if filename != 'shp_file':
+                            if filename != 'base_file':
                                 file_size += request.FILES[filename].size/1048576.0
                     # check limit size
                     is_able_upload = check_limit_size(uid,file_size,'dataset')
