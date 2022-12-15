@@ -257,6 +257,7 @@ class ResourceImporter(DynamicModelViewSet):
                 input_params={
                     **{"handler_module_path": str(handler)},
                     **extracted_params,
+                    **{"uid": request.user.id}
                 },
             )
 
