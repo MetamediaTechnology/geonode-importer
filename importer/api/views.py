@@ -229,6 +229,13 @@ class ResourceImporter(DynamicModelViewSet):
 
     def copy(self, request, *args, **kwargs):
         resource = self.get_object()
+        user = request.user
+        username = user.get_username()
+        uid = get_uid(username=username)
+        if not user.is_staff and settings.ENABLE_CHECK_USER_STORAGE:
+            is_able_upload = check_limit_size(uid, 0)
+            if not is_able_upload:
+                return Response(data={'error':'Storage usage exceed limit.'}, status=400)
         if resource.resourcehandlerinfo_set.exists():
 
             handler_module_path = (
