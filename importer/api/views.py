@@ -126,18 +126,12 @@ class ImporterViewSet(DynamicModelViewSet):
                 if not user.is_staff and settings.ENABLE_CHECK_USER_STORAGE:
                     username = user.get_username()
                     uid = get_uid(username=username)
-                    file_name = request.FILES.get('base_file')
                     file_size = 0
-                    if zipfile.is_zipfile(file_name):
-                        zp = zipfile.ZipFile(file_name)
-                        size = sum([zinfo.file_size for zinfo in zp.filelist])
-                        file_size = float(size)/1048576
-                    else:
-                        for filename, file in request.FILES.items():
-                            if filename != 'base_file':
-                                file_size += request.FILES[filename].size/1048576.0
+                    for filename, file in request.FILES.items():
+                        if filename != 'base_file':
+                            file_size += request.FILES[filename].size/1048576.0
                     # check limit size
-                    is_able_upload = check_limit_size(uid,file_size,'dataset')
+                    is_able_upload = check_limit_size(uid,file_size)
                     if not is_able_upload:
                         return Response(data={'error':'Storage usage exceed limit.'}, status=400)
 
